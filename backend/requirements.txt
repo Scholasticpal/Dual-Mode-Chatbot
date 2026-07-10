@@ -1,0 +1,14 @@
+fastapi
+uvicorn
+pydantic>=2.12.5
+langchain
+langchain-google-genai
+langchain-community
+langgraph
+supabase
+pypdf
+python-dotenv
+SQLAlchemy
+psycopg2-binary
+httpx>=0.28.1
+websockets>=13.0.0

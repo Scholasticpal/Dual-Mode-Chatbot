@@ -30,7 +30,7 @@ tools = [search_policies, query_orders]
 agent = create_react_agent(
     model=llm,
     tools=tools,
-    state_modifier=SYSTEM_PROMPT
+    messages_modifier=SYSTEM_PROMPT
 )
 
 def _extract_tool_content(output: Any) -> Any:
