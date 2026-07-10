@@ -15,6 +15,7 @@ __pycache__/
 
 # AI / IDE Context (Crucial to hide)
 antigravity_instructions.md
+ai_engineer_assessment.md
 .vscode/
 
 # OS Files
