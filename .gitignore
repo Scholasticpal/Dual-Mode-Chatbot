@@ -1,0 +1,22 @@
+# Environments
+backend/venv/
+backend/.env
+frontend/.env
+frontend/.env.local
+
+# Node
+frontend/node_modules/
+frontend/.next/
+
+# Python
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# AI / IDE Context (Crucial to hide)
+antigravity_instructions.md
+.vscode/
+
+# OS Files
+.DS_Store
+Thumbs.db
