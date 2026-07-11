@@ -50,7 +50,6 @@ def _get_embeddings() -> GoogleGenerativeAIEmbeddings:
     return GoogleGenerativeAIEmbeddings(
         model=EMBEDDING_MODEL,
         google_api_key=api_key,
-        output_dimensionality=EMBEDDING_DIMENSIONS,
     )
 
 
@@ -89,7 +88,7 @@ def _read_pdf_files(directory: Path) -> list[tuple[str, list[str]]]:
 
 
 def _embed_texts(embeddings: GoogleGenerativeAIEmbeddings, texts: list[str]) -> list[list[float]]:
-    return embeddings.embed_documents(texts)
+    return embeddings.embed_documents(texts, output_dimensionality=EMBEDDING_DIMENSIONS)
 
 
 def ingest_documents() -> None:

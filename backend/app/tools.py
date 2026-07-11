@@ -23,7 +23,6 @@ def _get_embeddings():
 
         _embeddings = GoogleGenerativeAIEmbeddings(
             model="models/gemini-embedding-001",
-            output_dimensionality=768,
         )
     return _embeddings
 
@@ -111,7 +110,7 @@ async def search_policies(query: str) -> str:
         embeddings = _get_embeddings()
         db = get_supabase_client()
 
-        query_embedding = await embeddings.aembed_query(query)
+        query_embedding = await embeddings.aembed_query(query, output_dimensionality=768)
 
         response = db.rpc(
             "match_document_sections",
