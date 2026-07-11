@@ -18,10 +18,9 @@ except Exception as e:
     raise RuntimeError(f"Failed to initialize Gemini embeddings: {e}")
 
 try:
-    llm = ChatGoogleGenerativeAI(model="gemini-1.5-flash")
+    llm = ChatGoogleGenerativeAI(model="gemini-1.0-pro")
 except Exception as e:
     raise RuntimeError(f"Failed to initialize Gemini LLM: {e}")
-
 
 @tool
 async def search_policies(query: str) -> str:

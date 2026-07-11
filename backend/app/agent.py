@@ -21,7 +21,7 @@ SYSTEM_PROMPT = (
 )
 
 llm = ChatGoogleGenerativeAI(
-    model="gemini-1.5-flash",
+    model="gemini-1.0-pro",
     temperature=0
 )
 
