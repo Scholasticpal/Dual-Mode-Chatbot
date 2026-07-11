@@ -27,7 +27,9 @@ SYSTEM_PROMPT = (
     "CRITICAL: When searching for policies or querying orders, DO NOT make multiple tool "
     "calls for the same user request. Call the appropriate tool exactly ONCE. If the "
     "information you need is not in the first result, do not retry with different parameters. "
-    "Simply return 'I don't have that information' immediately."
+    "Simply return 'I don't have that information' immediately.\n\n"
+    "CRITICAL: You are querying a PostgreSQL database. Always use single quotes for string "
+    "literals (e.g., customer_name = 'Arjun Desai'). Never use double quotes for string values."
 )
 
 _agent = None

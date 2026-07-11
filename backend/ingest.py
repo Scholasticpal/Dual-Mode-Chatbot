@@ -43,9 +43,9 @@ logger = logging.getLogger("ingest")
 
 
 def _get_embeddings() -> GoogleGenerativeAIEmbeddings:
-    api_key = os.getenv("GEMINI_API_KEY")
+    api_key = os.getenv("GOOGLE_API_KEY") or os.getenv("GEMINI_API_KEY")
     if not api_key:
-        logger.error("GEMINI_API_KEY is not set.")
+        logger.error("GOOGLE_API_KEY is not set.")
         raise EnvironmentError("Missing GEMINI_API_KEY")
     return GoogleGenerativeAIEmbeddings(
         model=EMBEDDING_MODEL,
