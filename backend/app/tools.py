@@ -34,7 +34,7 @@ def _get_llm():
     if _llm is None:
         from langchain_google_genai import ChatGoogleGenerativeAI
 
-        _llm = ChatGoogleGenerativeAI(model="gemini-2.5-flash-lite")
+        _llm = ChatGoogleGenerativeAI(model="gemini-2.5-flash")
     return _llm
 
 
