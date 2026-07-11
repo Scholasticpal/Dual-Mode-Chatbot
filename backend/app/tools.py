@@ -18,13 +18,22 @@ except Exception as e:
     raise RuntimeError(f"Failed to initialize Gemini embeddings: {e}")
 
 try:
-    llm = ChatGoogleGenerativeAI(model="gemini-1.0-pro")
+    llm = ChatGoogleGenerativeAI(model="gemini-3.1-flash-lite")
 except Exception as e:
     raise RuntimeError(f"Failed to initialize Gemini LLM: {e}")
 
+
 @tool
 async def search_policies(query: str) -> str:
-    """Semantic search across company policies."""
+    """Perform a semantic search across company policy documents in Supabase.
+    
+    Args:
+        query: Natural language query string.
+        
+    Returns:
+        Formatted string containing source document names and relevant text sections,
+        or a fallback message if no relevant documents are found.
+    """
     try:
         query_embedding = await embeddings.aembed_query(query)
         
@@ -32,7 +41,7 @@ async def search_policies(query: str) -> str:
             "match_document_sections",
             {
                 "query_embedding": query_embedding,
-                "match_threshold": 0.5,
+                "match_threshold": 0.6,
                 "match_count": 5
             }
         ).execute()
@@ -53,12 +62,28 @@ async def search_policies(query: str) -> str:
 
 @tool
 async def query_orders(query: str) -> Dict[str, Any]:
-    """Translate natural language to SQL and execute against the orders table."""
+    """Translate natural language to SQL and execute it against the orders table.
+    
+    Args:
+        query: Natural language query about order status, revenue, or customer data.
+        
+    Returns:
+        Dictionary containing the raw SQL execution results and the generated query string.
+    """
     try:
         chain = create_sql_query_chain(llm, sql_db)
         sql_query = await chain.ainvoke({"question": query})
         
-        clean_query = sql_query.replace("```sql", "").replace("```", "").strip()
+        if "SQLQuery:" in sql_query:
+            sql_query = sql_query.split("SQLQuery:")[-1]
+            
+        import re
+        match = re.search(r'(?i)SELECT\s+.*', sql_query, re.DOTALL)
+        if match:
+            clean_query = match.group(0).replace("```sql", "").replace("```", "").strip()
+        else:
+            clean_query = sql_query.replace("```sql", "").replace("```", "").strip()
+            
         result = sql_db.run(clean_query)
         
         return {
