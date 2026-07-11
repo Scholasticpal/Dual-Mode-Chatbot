@@ -25,7 +25,7 @@ This project utilizes a modern, dual-environment architecture (Python Backend / 
 | Technology / Service | Role in Project                                             |
 | :------------------- | :---------------------------------------------------------- |
 | **Supabase**         | PostgreSQL Database, `pgvector` Store, Transaction Pooler   |
-| **Groq (Llama-3)**   | Core LLM (`llama3-8b-8192`) for robust, free-tier tool execution          |
+| **Groq (Llama-3)**   | Core LLM (`llama-3.1-8b-instant`) for robust, free-tier tool execution          |
 | **Google Gemini**    | Vector Embeddings (`embedding-001` with 768-dim vectors)                  |
 | **LangGraph**        | Agent State Management & Deterministic Tool Routing         |
 | **FastAPI**          | Asynchronous API Backend & SSE Streaming                    |

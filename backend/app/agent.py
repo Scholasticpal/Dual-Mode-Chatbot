@@ -44,7 +44,7 @@ def _get_agent():
 
         from app.tools import query_orders, search_policies
 
-        llm = ChatGroq(model="llama3-8b-8192", temperature=0)
+        llm = ChatGroq(model="llama-3.1-8b-instant", temperature=0)
         tools = [search_policies, query_orders]
         _agent = create_react_agent(model=llm, tools=tools, prompt=SYSTEM_PROMPT)
     return _agent

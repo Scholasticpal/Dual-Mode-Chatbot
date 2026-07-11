@@ -34,7 +34,7 @@ def _get_llm():
     if _llm is None:
         from langchain_groq import ChatGroq
 
-        _llm = ChatGroq(model="llama3-8b-8192")
+        _llm = ChatGroq(model="llama-3.1-8b-instant")
     return _llm
 
 
