@@ -39,12 +39,12 @@ def _get_agent():
     """Return the LangGraph ReAct agent, creating it on first call."""
     global _agent
     if _agent is None:
-        from langchain_google_genai import ChatGoogleGenerativeAI
+        from langchain_groq import ChatGroq
         from langgraph.prebuilt import create_react_agent
 
         from app.tools import query_orders, search_policies
 
-        llm = ChatGoogleGenerativeAI(model="gemini-3.1-flash-lite", temperature=0)
+        llm = ChatGroq(model="llama3-8b-8192", temperature=0)
         tools = [search_policies, query_orders]
         _agent = create_react_agent(model=llm, tools=tools, prompt=SYSTEM_PROMPT)
     return _agent

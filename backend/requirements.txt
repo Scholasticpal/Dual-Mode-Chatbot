@@ -3,6 +3,7 @@ uvicorn
 pydantic>=2.12.5
 langchain<1.0.0
 langchain-community<1.0.0
+langchain-groq
 langchain-google-genai
 langgraph
 supabase

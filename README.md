@@ -2,7 +2,7 @@
 
 An enterprise-grade, asynchronous AI assistant built to seamlessly route user queries between internal corporate data tools (RAG/Text-to-SQL) and general knowledge models. 
 
-### [► View Architecture Diagram / Demo] *(Placeholder)*
+### [► View Live Application (Vercel)](https://dual-mode-chatbot.vercel.app/) | [► View Backend API (Render)](https://dual-mode-chatbot.onrender.com/)
 
 ---
 
@@ -25,7 +25,8 @@ This project utilizes a modern, dual-environment architecture (Python Backend / 
 | Technology / Service | Role in Project                                             |
 | :------------------- | :---------------------------------------------------------- |
 | **Supabase**         | PostgreSQL Database, `pgvector` Store, Transaction Pooler   |
-| **Google Gemini**    | Core LLM (3.1 Flash-Lite) & Embeddings (`embedding-001`)    |
+| **Groq (Llama-3)**   | Core LLM (`llama3-8b-8192`) for robust, free-tier tool execution          |
+| **Google Gemini**    | Vector Embeddings (`embedding-001` with 768-dim vectors)                  |
 | **LangGraph**        | Agent State Management & Deterministic Tool Routing         |
 | **FastAPI**          | Asynchronous API Backend & SSE Streaming                    |
 | **Next.js 16**       | Frontend Web Framework (React)                              |
@@ -73,7 +74,8 @@ This section contains everything needed to spin up the containerized architectur
 
 | Variable | Target | Meaning | Where to Retrieve |
 | :--- | :--- | :--- | :--- |
-| `GOOGLE_API_KEY` | Backend | Authenticates the Gemini LLM and Embedding models. | Google AI Studio. |
+| `GROQ_API_KEY` | Backend | Authenticates the Groq LLM (Llama-3) for agent routing and tool execution. | console.groq.com. |
+| `GOOGLE_API_KEY` | Backend | Authenticates the Gemini Embedding model for vector matching. | Google AI Studio. |
 | `SUPABASE_URL` | Backend | The REST URL for Supabase RPC calls (Vector matching). | Supabase > Project Settings > API. |
 | `SUPABASE_SERVICE_ROLE_KEY` | Backend | High-privilege key to bypass RLS for internal tool queries. | Supabase > Project Settings > API. |
 | `DATABASE_URL` | Backend | PostgreSQL connection for Langchain Text-to-SQL. | Supabase > Database > Connection String. **Must use the Transaction Pooler (IPv4) for Docker compatibility.** |
@@ -109,3 +111,5 @@ To meet production-level engineering standards, several specific design decision
 2. **Scroll Event Throttling:** The frontend auto-scrolls dynamically as tokens stream. To prevent main-thread blocking when users manually scroll up to read history, the scroll listener is wrapped in a 150ms throttle.
 3. **Strict Dependency Pinning:** The Python backend utilizes `python:3.11-slim` for image optimization, explicitly installing `gcc` and `libpq-dev` to compile C-bindings for database drivers. Core libraries like `langchain` are strictly pinned (e.g., `<1.0.0`) to prevent breaking module resolution errors during container rebuilds.
 4. **SQL Injection Mitigation:** The Text-to-SQL tool parses and strips raw Markdown code blocks via regex before execution, ensuring the SQLAlchemy driver does not crash on malformed LLM outputs. Read-only permissions are enforced at the database level.
+5. **Lazy Initialization Pattern:** To ensure test runner stability during GitHub Actions CI/CD pipelines, all global dependencies (Supabase clients, LangGraph agents, and LLMs) are lazily initialized. This prevents `ValueError` crashes during module import if environment variables are not yet injected.
+6. **Enterprise CI/CD & Testing:** A robust 24-test `pytest` suite covers API endpoints, tool logic, agent routing, and SQL extraction. GitHub Actions enforces these tests on every PR, guaranteeing that no breaking changes reach production.
