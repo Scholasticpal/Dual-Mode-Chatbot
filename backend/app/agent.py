@@ -73,6 +73,11 @@ async def run_agent(query: str) -> AsyncGenerator[str, None]:
                 if content:
                     yield json.dumps({"type": "token", "content": content}) + "\n"
 
+        elif kind == "on_tool_start":
+            name = event.get("name")
+            if name in ["search_policies", "query_orders"]:
+                yield json.dumps({"type": "tool_start", "tool": name}) + "\n"
+
         elif kind == "on_tool_end":
             name = event.get("name")
             output = _extract_tool_content(event["data"].get("output"))
