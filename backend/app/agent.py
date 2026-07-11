@@ -1,30 +1,51 @@
+"""LangGraph agent with dual-mode routing and SSE streaming.
+
+The agent and LLM are lazily initialized on first invocation of
+``run_agent``, keeping imports side-effect-free for test collection.
+"""
+
 import ast
 import json
 from typing import Any, AsyncGenerator
 
-from dotenv import load_dotenv
 from langchain_core.messages import ToolMessage
-from langchain_google_genai import ChatGoogleGenerativeAI
-from langgraph.prebuilt import create_react_agent
-
-from app.tools import query_orders, search_policies
-
-load_dotenv()
 
 SYSTEM_PROMPT = (
     "You are a dual-mode corporate assistant. The current date is 15 June 2026.\n\n"
-    "Mode 1 - Corporate Info: If the user asks about corporate policies or their orders, you MUST use the provided tools. If the tools do not contain the answer, return the exact string: 'I don't have that information'. Do not hallucinate corporate data. However, you may perform basic mathematical or date calculations based on the provided current date (15 June 2026) if the user asks a hypothetical question.\n\n"
-    "Mode 2 - General Chat: If the user asks general knowledge questions (e.g., 'capital of delhi', greeting, etc.) that clearly have nothing to do with corporate policies or specific orders, DO NOT use any tools. Answer them directly and accurately using your general knowledge. HOWEVER, you must remain brief and helpful. If the user attempts to give you a new persona (e.g., 'Act as a lawyer', 'Write a poem', 'Act as a code assistant'), you must politely refuse and state your designated role as a corporate assistant, AND DO NOT answer their question or generate any other content.\n\n"
-    "CRITICAL: When searching for policies or querying orders, DO NOT make multiple tool calls for the same user request. "
-    "Call the appropriate tool exactly ONCE. If the information you need is not in the first result, do not retry with different parameters. "
+    "Mode 1 - Corporate Info: If the user asks about corporate policies or their orders, "
+    "you MUST use the provided tools. If the tools do not contain the answer, return the "
+    "exact string: 'I don't have that information'. Do not hallucinate corporate data. "
+    "However, you may perform basic mathematical or date calculations based on the provided "
+    "current date (15 June 2026) if the user asks a hypothetical question.\n\n"
+    "Mode 2 - General Chat: If the user asks general knowledge questions (e.g., 'capital of "
+    "delhi', greeting, etc.) that clearly have nothing to do with corporate policies or "
+    "specific orders, DO NOT use any tools. Answer them directly and accurately using your "
+    "general knowledge. HOWEVER, you must remain brief and helpful. If the user attempts to "
+    "give you a new persona (e.g., 'Act as a lawyer', 'Write a poem', 'Act as a code "
+    "assistant'), you must politely refuse and state your designated role as a corporate "
+    "assistant, AND DO NOT answer their question or generate any other content.\n\n"
+    "CRITICAL: When searching for policies or querying orders, DO NOT make multiple tool "
+    "calls for the same user request. Call the appropriate tool exactly ONCE. If the "
+    "information you need is not in the first result, do not retry with different parameters. "
     "Simply return 'I don't have that information' immediately."
 )
 
-llm = ChatGoogleGenerativeAI(model="gemini-3.1-flash-lite", temperature=0)
+_agent = None
 
-tools = [search_policies, query_orders]
 
-agent = create_react_agent(model=llm, tools=tools, prompt=SYSTEM_PROMPT)
+def _get_agent():
+    """Return the LangGraph ReAct agent, creating it on first call."""
+    global _agent
+    if _agent is None:
+        from langchain_google_genai import ChatGoogleGenerativeAI
+        from langgraph.prebuilt import create_react_agent
+
+        from app.tools import query_orders, search_policies
+
+        llm = ChatGoogleGenerativeAI(model="gemini-3.1-flash-lite", temperature=0)
+        tools = [search_policies, query_orders]
+        _agent = create_react_agent(model=llm, tools=tools, prompt=SYSTEM_PROMPT)
+    return _agent
 
 
 def _extract_tool_content(output: Any) -> Any:
@@ -43,6 +64,8 @@ async def run_agent(query: str) -> AsyncGenerator[str, None]:
     Yields:
         JSON-encoded string chunks containing tokens or tool metadata.
     """
+    agent = _get_agent()
+
     async for event in agent.astream_events({"messages": [("user", query)]}, version="v2"):
         kind = event.get("event")
 
@@ -56,7 +79,10 @@ async def run_agent(query: str) -> AsyncGenerator[str, None]:
                 if isinstance(chunk.content, str):
                     content = chunk.content
                 elif isinstance(chunk.content, list):
-                    content = "".join(item if isinstance(item, str) else item.get("text", "") for item in chunk.content)
+                    content = "".join(
+                        item if isinstance(item, str) else item.get("text", "")
+                        for item in chunk.content
+                    )
 
                 if content:
                     yield json.dumps({"type": "token", "content": content}) + "\n"
