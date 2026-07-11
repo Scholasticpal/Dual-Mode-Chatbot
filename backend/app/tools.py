@@ -32,9 +32,9 @@ def _get_llm():
     """Return the Gemini LLM instance, creating it on first call."""
     global _llm
     if _llm is None:
-        from langchain_google_genai import ChatGoogleGenerativeAI
+        from langchain_groq import ChatGroq
 
-        _llm = ChatGoogleGenerativeAI(model="gemini-3.1-flash-lite", temperature=0)
+        _llm = ChatGroq(model="meta-llama/llama-4-scout-17b-16e-instruct", temperature=0)
     return _llm
 
 

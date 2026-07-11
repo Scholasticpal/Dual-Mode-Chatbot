@@ -11,7 +11,12 @@ from app.agent import run_agent
 
 app = FastAPI(title="Backend Agent API")
 
-allowed_origins = ["http://localhost:3000"]
+allowed_origins = [
+    "http://localhost:3000",
+    "http://localhost:3001",
+    "http://127.0.0.1:3000",
+    "http://127.0.0.1:3001"
+]
 extra_origin = os.getenv("CORS_ORIGIN")
 if extra_origin:
     allowed_origins.append(extra_origin)
