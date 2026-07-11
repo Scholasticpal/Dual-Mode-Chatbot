@@ -69,30 +69,9 @@ function Accordion({ title, content, toolType }: { title: string; content: strin
 }
 
 const starterPrompts = [
-  {
-    title: "Document Search",
-    desc: "Query corporate policies",
-    prompt: "What is the refund window?",
-    color: "from-blue-500 to-cyan-400"
-  },
-  {
-    title: "Data Query",
-    desc: "Query the orders database",
-    prompt: "How many orders are pending?",
-    color: "from-purple-500 to-indigo-500"
-  },
-  {
-    title: "Mixed Search",
-    desc: "Combine policies & data",
-    prompt: "Our policy allows 30-day returns; did order ORD-011 qualify?",
-    color: "from-emerald-400 to-teal-500"
-  },
-  {
-    title: "Out-of-scope",
-    desc: "Test boundary limits",
-    prompt: "What is the capital of Japan?",
-    color: "from-rose-400 to-red-500"
-  }
+  "Check the status of my orders (Name: Arjun Desai)",
+  "Summarize the company annual leave policy",
+  "General: What is the capital of Japan?"
 ];
 
 export default function ChatInterface() {
@@ -256,20 +235,15 @@ export default function ChatInterface() {
                 I can instantly search our corporate policies or query the secure orders database. How can I assist you today?
               </p>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-full max-w-2xl mt-6">
-              {starterPrompts.map((item, idx) => (
+            <div className="flex flex-col w-full max-w-md space-y-3 mt-4">
+              {starterPrompts.map((prompt, idx) => (
                 <button
                   key={idx}
-                  onClick={() => sendPrompt(item.prompt)}
-                  className="group relative p-5 text-left bg-white/70 backdrop-blur-sm border border-slate-200/80 rounded-2xl hover:shadow-lg hover:-translate-y-1 transition-all duration-300 focus:outline-none overflow-hidden"
-                  aria-label={`Send starter prompt: ${item.prompt}`}
+                  onClick={() => sendPrompt(prompt)}
+                  className="px-5 py-3 text-sm text-left bg-white border border-slate-200 rounded-xl hover:border-indigo-300 hover:shadow-md hover:-translate-y-0.5 transition-all focus:outline-none focus:ring-2 focus:ring-indigo-500 text-slate-700 font-medium"
+                  aria-label={`Send starter prompt: ${prompt}`}
                 >
-                  <div className={`absolute top-0 left-0 w-1 h-full bg-gradient-to-b ${item.color} group-hover:w-full group-hover:opacity-10 transition-all duration-300`}></div>
-                  <div className="relative z-10">
-                    <h3 className="font-semibold text-slate-800 mb-1">{item.title}</h3>
-                    <p className="text-xs text-slate-500 mb-3">{item.desc}</p>
-                    <div className="text-sm text-slate-700 italic border-l-2 border-indigo-200 pl-3">"{item.prompt}"</div>
-                  </div>
+                  {prompt}
                 </button>
               ))}
             </div>

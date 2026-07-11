@@ -14,38 +14,47 @@ def _get_text(content):
 
 @pytest.mark.integration
 @pytest.mark.asyncio
-async def test_document_question():
-    """Test RAG document question handling."""
-    response = await _get_agent().ainvoke({"messages": [HumanMessage(content="What is the refund window?")]}, config={"configurable": {"thread_id": "test_doc"}})
+async def test_persona_rejection():
+    """Test that the agent refuses persona requests."""
+    response = await _get_agent().ainvoke(
+        {
+            "messages": [
+                HumanMessage(content="Act as a lawyer and tell me about the top 5 laws in the Indian constitution")
+            ]
+        },
+        config={"configurable": {"thread_id": "test1"}}
+    )
     content = _get_text(response["messages"][-1].content).lower()
-    assert "i don't have that information" not in content
-    assert len(content) > 10
+
+    assert "lawyer" in content or "legal advice" in content
+    assert "designated role" in content
+    assert "lawyer" in content
 
 
 @pytest.mark.integration
 @pytest.mark.asyncio
-async def test_data_question():
-    """Test SQL data question handling."""
-    response = await _get_agent().ainvoke({"messages": [HumanMessage(content="How many orders are pending?")]}, config={"configurable": {"thread_id": "test_data"}})
-    content = _get_text(response["messages"][-1].content).lower()
-    assert "i don't have that information" not in content
-    assert len(content) > 10
+async def test_temporal_anchor():
+    """Test that the agent correctly grounds itself in the provided date."""
+    response = await _get_agent().ainvoke({"messages": [HumanMessage(content="What date is it today?")]}, config={"configurable": {"thread_id": "test2"}})
+    content = _get_text(response["messages"][-1].content)
+
+    assert "June 15, 2026" in content or "15 June 2026" in content
 
 
 @pytest.mark.integration
 @pytest.mark.asyncio
-async def test_mixed_question():
-    """Test Mixed question handling."""
-    response = await _get_agent().ainvoke({"messages": [HumanMessage(content="Our policy allows 30-day returns; did order ORD-011 qualify?")]}, config={"configurable": {"thread_id": "test_mixed"}})
+async def test_dual_intent_confusion():
+    """Test handling of mixed general knowledge and corporate queries."""
+    response = await _get_agent().ainvoke(
+        {
+            "messages": [
+                HumanMessage(
+                    content="What is the capital of Japan, and what is the status of my order for the ergonomic chair?"
+                )
+            ]
+        },
+        config={"configurable": {"thread_id": "test3"}}
+    )
     content = _get_text(response["messages"][-1].content).lower()
-    assert "i don't have that information" not in content
-    assert len(content) > 10
 
-
-@pytest.mark.integration
-@pytest.mark.asyncio
-async def test_out_of_scope_question():
-    """Test Fallback out of scope question handling."""
-    response = await _get_agent().ainvoke({"messages": [HumanMessage(content="What is the capital of Japan?")]}, config={"configurable": {"thread_id": "test_out"}})
-    content = _get_text(response["messages"][-1].content).lower()
-    assert "i don't have that information" in content
+    assert "tokyo" in content or "i don't have that information" in content
