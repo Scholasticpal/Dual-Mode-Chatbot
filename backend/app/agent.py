@@ -1,14 +1,13 @@
 import ast
 import json
-import os
-from typing import AsyncGenerator, Any
+from typing import Any, AsyncGenerator
 
 from dotenv import load_dotenv
-from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_core.messages import ToolMessage
+from langchain_google_genai import ChatGoogleGenerativeAI
 from langgraph.prebuilt import create_react_agent
 
-from app.tools import search_policies, query_orders
+from app.tools import query_orders, search_policies
 
 load_dotenv()
 
@@ -21,18 +20,12 @@ SYSTEM_PROMPT = (
     "Simply return 'I don't have that information' immediately."
 )
 
-llm = ChatGoogleGenerativeAI(
-    model="gemini-3.1-flash-lite",
-    temperature=0
-)
+llm = ChatGoogleGenerativeAI(model="gemini-3.1-flash-lite", temperature=0)
 
 tools = [search_policies, query_orders]
 
-agent = create_react_agent(
-    model=llm,
-    tools=tools,
-    prompt=SYSTEM_PROMPT
-)
+agent = create_react_agent(model=llm, tools=tools, prompt=SYSTEM_PROMPT)
+
 
 def _extract_tool_content(output: Any) -> Any:
     """Extract content from a tool message if wrapped, otherwise return raw output."""
@@ -40,36 +33,31 @@ def _extract_tool_content(output: Any) -> Any:
         return output.content
     return output
 
+
 async def run_agent(query: str) -> AsyncGenerator[str, None]:
     """Execute the core LangGraph agent with streaming output and dual-mode routing.
-    
+
     Args:
         query: The user's input string.
-        
+
     Yields:
         JSON-encoded string chunks containing tokens or tool metadata.
     """
-    async for event in agent.astream_events(
-        {"messages": [("user", query)]},
-        version="v2"
-    ):
+    async for event in agent.astream_events({"messages": [("user", query)]}, version="v2"):
         kind = event.get("event")
-        
+
         if kind == "on_chat_model_stream":
             if event.get("metadata", {}).get("langgraph_node") != "agent":
                 continue
-                
+
             chunk = event["data"].get("chunk")
             if chunk and chunk.content:
                 content = ""
                 if isinstance(chunk.content, str):
                     content = chunk.content
                 elif isinstance(chunk.content, list):
-                    content = "".join(
-                        item if isinstance(item, str) else item.get("text", "")
-                        for item in chunk.content
-                    )
-                
+                    content = "".join(item if isinstance(item, str) else item.get("text", "") for item in chunk.content)
+
                 if content:
                     yield json.dumps({"type": "token", "content": content}) + "\n"
 
@@ -81,10 +69,10 @@ async def run_agent(query: str) -> AsyncGenerator[str, None]:
         elif kind == "on_tool_end":
             name = event.get("name")
             output = _extract_tool_content(event["data"].get("output"))
-            
+
             if name == "search_policies":
                 yield json.dumps({"type": "tool_metadata", "tool": name, "data": output}) + "\n"
-            
+
             elif name == "query_orders":
                 parsed = {}
                 if isinstance(output, str):

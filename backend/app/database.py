@@ -1,8 +1,9 @@
 import os
+
 from dotenv import load_dotenv
-from supabase import create_client, Client
 from langchain_community.utilities import SQLDatabase
 from sqlalchemy import create_engine
+from supabase import Client, create_client
 
 load_dotenv()
 

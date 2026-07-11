@@ -1,7 +1,7 @@
 """Unit tests for the FastAPI application endpoints."""
 
 import json
-from unittest.mock import AsyncMock, patch
+from unittest.mock import patch
 
 import pytest
 from httpx import ASGITransport, AsyncClient

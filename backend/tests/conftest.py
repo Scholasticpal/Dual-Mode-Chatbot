@@ -36,8 +36,7 @@ def mock_sql_chain_output_clean():
 def mock_sql_chain_output_with_prefix():
     """Returns a SQL query string with the Question/SQLQuery prefix Gemini sometimes adds."""
     return (
-        "Question: What are the orders for Arjun Desai?\n"
-        "SQLQuery: SELECT * FROM orders WHERE customer = 'Arjun Desai'"
+        "Question: What are the orders for Arjun Desai?\nSQLQuery: SELECT * FROM orders WHERE customer = 'Arjun Desai'"
     )
 
 

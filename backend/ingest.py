@@ -15,7 +15,7 @@ from typing import Any
 from dotenv import load_dotenv
 from langchain_google_genai import GoogleGenerativeAIEmbeddings
 from pypdf import PdfReader
-from supabase import create_client, Client
+from supabase import Client, create_client
 
 load_dotenv()
 
@@ -41,6 +41,7 @@ logging.basicConfig(
 )
 logger = logging.getLogger("ingest")
 
+
 def _get_embeddings() -> GoogleGenerativeAIEmbeddings:
     api_key = os.getenv("GEMINI_API_KEY")
     if not api_key:
@@ -52,6 +53,7 @@ def _get_embeddings() -> GoogleGenerativeAIEmbeddings:
         output_dimensionality=EMBEDDING_DIMENSIONS,
     )
 
+
 def _get_db() -> Client:
     url = os.getenv("SUPABASE_URL")
     key = os.getenv("SUPABASE_SERVICE_ROLE_KEY")
@@ -59,6 +61,7 @@ def _get_db() -> Client:
         logger.error("SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY is not set.")
         raise EnvironmentError("Missing Supabase credentials")
     return create_client(url, key)
+
 
 def _read_pdf_files(directory: Path) -> list[tuple[str, list[str]]]:
     """Extracts non-empty text chunks from PDF files in the specified directory."""
@@ -84,8 +87,10 @@ def _read_pdf_files(directory: Path) -> list[tuple[str, list[str]]]:
 
     return results
 
+
 def _embed_texts(embeddings: GoogleGenerativeAIEmbeddings, texts: list[str]) -> list[list[float]]:
     return embeddings.embed_documents(texts)
+
 
 def ingest_documents() -> None:
     """Ingests PDF documents into the document_sections table."""
@@ -126,7 +131,10 @@ def ingest_documents() -> None:
             logger.exception("Insert failed for '%s'.", filename)
             continue
 
-    logger.info("Document ingestion complete — %d total section(s) in %.2f s.", total_sections, time.perf_counter() - start)
+    logger.info(
+        "Document ingestion complete — %d total section(s) in %.2f s.", total_sections, time.perf_counter() - start
+    )
+
 
 def _normalise_date(value: str) -> str:
     """Converts a date string to ISO 8601 (YYYY-MM-DD)."""
@@ -147,6 +155,7 @@ def _normalise_date(value: str) -> str:
     logger.warning("Could not parse date '%s' — inserting as-is.", value)
     return value
 
+
 def _load_orders(csv_path: Path) -> list[dict[str, Any]]:
     """Loads and sanitises orders from CSV."""
     if not csv_path.exists():
@@ -161,7 +170,7 @@ def _load_orders(csv_path: Path) -> list[dict[str, Any]]:
             raise ValueError("CSV header missing")
 
         col_map = {col: col.strip().lower() for col in reader.fieldnames}
-        
+
         for idx, raw_row in enumerate(reader, start=1):
             row = {}
             for original_col, normalised_col in col_map.items():
@@ -182,9 +191,11 @@ def _load_orders(csv_path: Path) -> list[dict[str, Any]]:
     logger.info("Loaded %d order row(s) from '%s'.", len(rows), csv_path.name)
     return rows
 
+
 def _chunked(lst: list, size: int):
     for i in range(0, len(lst), size):
         yield lst[i : i + size]
+
 
 def ingest_orders() -> None:
     """Ingests orders from CSV into the orders table in batches."""
@@ -210,7 +221,10 @@ def ingest_orders() -> None:
         except Exception:
             logger.exception("Chunk %d/%d failed.", chunk_idx, len(chunks))
 
-    logger.info("Orders ingestion complete — %d row(s) inserted in %.2f s.", total_inserted, time.perf_counter() - start)
+    logger.info(
+        "Orders ingestion complete — %d row(s) inserted in %.2f s.", total_inserted, time.perf_counter() - start
+    )
+
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Ingest documents and orders into Supabase.")
@@ -226,6 +240,7 @@ def main() -> None:
 
     if run_orders:
         ingest_orders()
+
 
 if __name__ == "__main__":
     main()
