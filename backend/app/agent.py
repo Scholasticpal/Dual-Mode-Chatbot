@@ -40,8 +40,8 @@ def _get_agent():
     global _agent
     if _agent is None:
         from langchain_groq import ChatGroq
-        from langgraph.prebuilt import create_react_agent
         from langgraph.checkpoint.memory import MemorySaver
+        from langgraph.prebuilt import create_react_agent
 
         from app.tools import query_orders, search_policies
 
@@ -71,8 +71,8 @@ async def run_agent(query: str) -> AsyncGenerator[str, None]:
     agent = _get_agent()
 
     async for event in agent.astream_events(
-        {"messages": [("user", query)]}, 
-        config={"configurable": {"thread_id": "1"}}, 
+        {"messages": [("user", query)]},
+        config={"configurable": {"thread_id": "1"}},
         version="v2"
     ):
         kind = event.get("event")

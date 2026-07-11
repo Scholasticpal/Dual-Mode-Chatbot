@@ -126,7 +126,7 @@ async def query_orders(query: str) -> Dict[str, Any]:
         sql_db = get_sql_db()
 
         chain = create_sql_query_chain(llm, sql_db)
-        
+
         enhanced_query = f"{query}\n\nSTRICT RULES:\n1. Use the exact customer name or product provided in the question. Do NOT use functions or placeholders like CURRENT_USER.\n2. Return ONLY the valid SQL query."
         sql_query = await chain.ainvoke({"question": enhanced_query})
 
