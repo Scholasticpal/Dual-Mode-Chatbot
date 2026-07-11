@@ -113,10 +113,24 @@ async def search_policies(query: str) -> str:
 
         query_embedding = await embeddings.aembed_query(query)
 
-        response = db.rpc(
-            "match_document_sections",
-            {"query_embedding": query_embedding, "match_threshold": 0.6, "match_count": 5},
-        ).execute()
+        try:
+            response = db.rpc(
+                "match_document_sections",
+                {"query_embedding": query_embedding, "match_threshold": 0.6, "match_count": 5},
+            ).execute()
+        except Exception as db_err:
+            if "different vector dimensions" in str(db_err):
+                # Production database might be using 3072 dimensions, fallback to 3072.
+                from langchain_google_genai import GoogleGenerativeAIEmbeddings
+                fallback_embeddings = GoogleGenerativeAIEmbeddings(model="models/gemini-embedding-001")
+                fallback_query_embedding = await fallback_embeddings.aembed_query(query)
+
+                response = db.rpc(
+                    "match_document_sections",
+                    {"query_embedding": fallback_query_embedding, "match_threshold": 0.6, "match_count": 5},
+                ).execute()
+            else:
+                raise db_err
 
         return format_rag_results(response.data)
     except Exception as e:
