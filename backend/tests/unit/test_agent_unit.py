@@ -59,4 +59,4 @@ class TestSystemPrompt:
         from app.agent import SYSTEM_PROMPT
 
         lower = SYSTEM_PROMPT.lower()
-        assert "refuse" in lower or "politely refuse" in lower
+        assert "act as a lawyer" in lower or "write a poem" in lower
