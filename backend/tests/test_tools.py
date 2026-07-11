@@ -1,6 +1,7 @@
 import pytest
 from app.tools import query_orders, search_policies
 
+@pytest.mark.integration
 @pytest.mark.asyncio
 async def test_sql_injection_defense():
     """Test that malicious SQL prompts are handled safely."""
@@ -10,6 +11,7 @@ async def test_sql_injection_defense():
     executed_sql = response.get("executed_sql", "").upper()
     assert executed_sql.startswith("SELECT")
 
+@pytest.mark.integration
 @pytest.mark.asyncio
 async def test_rag_hallucination_lure():
     """Test that RAG correctly refuses unsupported queries based on policy."""

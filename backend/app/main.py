@@ -1,5 +1,6 @@
 import json
 import logging
+import os
 from fastapi import FastAPI
 from fastapi.responses import StreamingResponse
 from fastapi.middleware.cors import CORSMiddleware
@@ -9,15 +10,26 @@ from app.agent import run_agent
 
 app = FastAPI(title="Backend Agent API")
 
+allowed_origins = ["http://localhost:3000"]
+extra_origin = os.getenv("CORS_ORIGIN")
+if extra_origin:
+    allowed_origins.append(extra_origin)
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],
+    allow_origins=allowed_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
 logger = logging.getLogger("api")
+
+
+@app.get("/health")
+async def health_check():
+    """Liveness probe for Docker and load balancers."""
+    return {"status": "ok"}
 
 class ChatRequest(BaseModel):
     message: str

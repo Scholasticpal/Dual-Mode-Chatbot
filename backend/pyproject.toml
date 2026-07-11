@@ -1,0 +1,21 @@
+[project]
+name = "dual-mode-chatbot-backend"
+version = "1.0.0"
+description = "Dual-Mode Corporate Intelligence System - Backend"
+requires-python = ">=3.11"
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
+markers = [
+    "integration: marks tests that require live external services (Supabase, Gemini)",
+    "unit: marks fast, isolated unit tests with mocked dependencies",
+]
+
+[tool.ruff]
+line-length = 120
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "W"]
+ignore = ["E501"]

@@ -12,3 +12,5 @@ SQLAlchemy
 psycopg2-binary
 httpx>=0.28.1
 websockets>=13.0.0
+pytest
+pytest-asyncio

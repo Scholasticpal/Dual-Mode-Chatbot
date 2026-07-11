@@ -9,6 +9,7 @@ def _get_text(content):
         return "".join(item if isinstance(item, str) else item.get("text", "") for item in content)
     return str(content)
 
+@pytest.mark.integration
 @pytest.mark.asyncio
 async def test_persona_rejection():
     """Test that the agent refuses persona requests."""
@@ -19,6 +20,7 @@ async def test_persona_rejection():
     assert "designated role" in content
     assert "lawyer" in content
 
+@pytest.mark.integration
 @pytest.mark.asyncio
 async def test_temporal_anchor():
     """Test that the agent correctly grounds itself in the provided date."""
@@ -27,6 +29,7 @@ async def test_temporal_anchor():
     
     assert "June 15, 2026" in content or "15 June 2026" in content
 
+@pytest.mark.integration
 @pytest.mark.asyncio
 async def test_dual_intent_confusion():
     """Test handling of mixed general knowledge and corporate queries."""
